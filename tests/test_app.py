@@ -14,9 +14,6 @@ import pytest
 from app import app
 from database import initialize_database
 
-if str(PROJECT_FOLDER) not in sys.path:
-    sys.path.insert(0, str(PROJECT_FOLDER))
-
 
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
@@ -36,6 +33,34 @@ def client(tmp_path, monkeypatch):
 
     with app.test_client() as test_client:
         yield test_client
+
+
+def add_test_student(client):
+    client.post(
+        "/students/new",
+        data={
+            "student_number": "2026-001",
+            "full_name": "Juan Dela Cruz",
+            "email": "juan@example.com",
+        },
+    )
+
+
+def get_student_id():
+    connection = database.get_connection()
+
+    student = connection.execute(
+        """
+        SELECT id
+        FROM students
+        WHERE student_number = ?
+        """,
+        ("2026-001",),
+    ).fetchone()
+
+    connection.close()
+
+    return student["id"]
 
 
 def test_home_page_loads(client):
@@ -73,6 +98,56 @@ def test_student_requires_number_and_name(client):
 
     assert response.status_code == 200
     assert b"Student number and full name are required." in response.data
+
+
+def test_duplicate_student_number_is_rejected(client):
+    add_test_student(client)
+
+    response = client.post(
+        "/students/new",
+        data={
+            "student_number": "2026-001",
+            "full_name": "Another Student",
+            "email": "another@example.com",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"That student number already exists." in response.data
+
+
+def test_student_can_be_edited(client):
+    add_test_student(client)
+
+    student_id = get_student_id()
+
+    response = client.post(
+        f"/students/{student_id}/edit",
+        data={
+            "student_number": "2026-001",
+            "full_name": "Juan Updated",
+            "email": "updated@example.com",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Juan Updated" in response.data
+    assert b"updated@example.com" in response.data
+
+
+def test_student_can_be_deleted(client):
+    add_test_student(client)
+
+    student_id = get_student_id()
+
+    response = client.post(
+        f"/students/{student_id}/delete",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Juan Dela Cruz" not in response.data
 
 
 def test_class_schedule_can_be_added(client):
