@@ -7,12 +7,13 @@
   </head>
   <body>
     <h1>Student Database</h1>
-    <p>
-      <a href="/students/new">Add New Student</a>
-    </p>
 
     <p>
       <a href="/">Back to Dashboard</a>
+    </p>
+
+    <p>
+      <a href="/students/new">Add New Student</a>
     </p>
 
     <table border="1" cellpadding="8">
@@ -21,6 +22,7 @@
           <th>Student Number</th>
           <th>Full Name</th>
           <th>Email</th>
+          <th>Action</th>
         </tr>
       </thead>
 
@@ -30,10 +32,13 @@
           <td>{{ student["student_number"] }}</td>
           <td>{{ student["full_name"] }}</td>
           <td>{{ student["email"] or "No email" }}</td>
+          <td>
+            <a href="/students/{{ student['id'] }}/edit"> Edit </a>
+          </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="3">No students have been added yet.</td>
+          <td colspan="4">No students have been added yet.</td>
         </tr>
         {% endfor %}
       </tbody>
