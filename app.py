@@ -141,6 +141,21 @@ def edit_student(student_id):
     )
 
 
+@app.route("/students/<int:student_id>/delete", methods=["POST"])
+def delete_student(student_id):
+    connection = get_connection()
+
+    connection.execute(
+        "DELETE FROM students WHERE id = ?",
+        (student_id,),
+    )
+
+    connection.commit()
+    connection.close()
+
+    return redirect("/students")
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)
