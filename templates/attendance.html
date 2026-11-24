@@ -1,72 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Attendance | RollCall</title>
-</head>
-<body>
-    <h1>Record Attendance</h1>
+{% extends "base.html" %}
 
-    <p>
-        <strong>{{ class_item["subject_code"] }}</strong>
-        -
-        {{ class_item["subject_name"] }}
-        -
-        {{ class_item["section"] }}
-    </p>
+{% block title %}
+Record Attendance | RollCall
+{% endblock %}
 
-    <p>
-        <a href="/classes">Back to Class Schedules</a>
-    </p>
-
-    {% if message %}
-        <p style="color: green;">
-            {{ message }}
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">
+            {{ class_item["subject_code"] }} · {{ class_item["section"] }}
         </p>
-    {% endif %}
 
-    {% if holiday %}
-        <p style="color: red;">
-            Public holiday detected:
-            <strong>{{ holiday["name"] }}</strong>
-        </p>
-    {% endif %}
+        <h1>Record Attendance</h1>
+        <p>{{ class_item["subject_name"] }}</p>
+    </div>
 
-    {% if api_error %}
-        <p style="color: orange;">
-            The public holiday API could not be reached.
-            Please verify the date manually.
-        </p>
-    {% endif %}
+    <a class="button secondary" href="/classes">
+        Back to Classes
+    </a>
+</div>
 
+{% if message %}
+    <div class="success-message">
+        {{ message }}
+    </div>
+{% endif %}
+
+{% if holiday %}
+    <div class="error-message">
+        Public holiday detected:
+        <strong>{{ holiday["name"] }}</strong>
+        <br>
+        Attendance cannot be saved for this date.
+    </div>
+{% endif %}
+
+{% if api_error %}
+    <div class="error-message">
+        The public holiday API could not be reached.
+        Please verify the date manually.
+    </div>
+{% endif %}
+
+<div class="form-card">
     <form method="get">
-        <label for="attendance_date">Attendance Date:</label>
+        <div class="form-group">
+            <label for="attendance_date">
+                Attendance Date
+            </label>
 
-        <input
-            type="date"
-            id="attendance_date"
-            name="attendance_date"
-            value="{{ attendance_date }}"
-            required
-        >
+            <input
+                type="date"
+                id="attendance_date"
+                name="attendance_date"
+                value="{{ attendance_date }}"
+                required
+            >
+        </div>
 
-        <button type="submit">
+        <button class="button secondary" type="submit">
             Check Date
         </button>
     </form>
+</div>
 
-    <br>
+<br>
 
-    <form method="post">
-        <input
-            type="hidden"
-            name="attendance_date"
-            value="{{ attendance_date }}"
-        >
+<div class="table-card">
+    {% if enrolled_students %}
+        <form method="post">
+            <input
+                type="hidden"
+                name="attendance_date"
+                value="{{ attendance_date }}"
+            >
 
-        {% if enrolled_students %}
-            <table border="1" cellpadding="8">
+            <table>
                 <thead>
                     <tr>
                         <th>Student Number</th>
@@ -151,19 +160,19 @@
             <br>
 
             {% if holiday %}
-                <button type="submit" disabled>
+                <button class="button danger" type="submit" disabled>
                     Attendance Disabled on Holiday
                 </button>
             {% else %}
-                <button type="submit">
+                <button class="button" type="submit">
                     Save Attendance
                 </button>
             {% endif %}
-        {% else %}
-            <p>
-                No students are enrolled in this class yet.
-            </p>
-        {% endif %}
-    </form>
-</body>
-</html>
+        </form>
+    {% else %}
+        <p class="empty-message">
+            No students are enrolled in this class yet.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
