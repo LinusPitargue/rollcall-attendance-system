@@ -38,6 +38,10 @@ def home():
         <p>
             <a href="/classes">View Class Schedules</a>
         </p>
+
+        <p>
+            <a href="/reports">View Attendance Reports</a>
+        </p>
     </body>
     </html>
     """
@@ -578,6 +582,93 @@ def record_attendance(class_id):
         holiday=holiday,
         api_error=api_error,
         message=message,
+    )
+
+
+@app.route("/reports")
+def reports():
+    selected_class_id = request.args.get("class_id", type=int)
+
+    connection = get_connection()
+
+    class_list = connection.execute(
+        """
+        SELECT id, subject_code, subject_name, section
+        FROM classes
+        ORDER BY subject_code
+        """
+    ).fetchall()
+
+    query = """
+        SELECT
+            classes.subject_code,
+            classes.subject_name,
+            classes.section,
+            students.student_number,
+            students.full_name,
+            COUNT(attendance.id) AS total_records,
+            SUM(
+                CASE
+                    WHEN attendance.status = 'Present'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS present_count,
+            SUM(
+                CASE
+                    WHEN attendance.status = 'Absent'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS absent_count,
+            SUM(
+                CASE
+                    WHEN attendance.status = 'Late'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS late_count,
+            SUM(
+                CASE
+                    WHEN attendance.status = 'Excused'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS excused_count
+        FROM attendance
+        INNER JOIN students
+            ON students.id = attendance.student_id
+        INNER JOIN classes
+            ON classes.id = attendance.class_id
+    """
+
+    parameters = []
+
+    if selected_class_id is not None:
+        query += " WHERE classes.id = ?"
+        parameters.append(selected_class_id)
+
+    query += """
+        GROUP BY
+            classes.id,
+            students.id
+        ORDER BY
+            classes.subject_code,
+            students.full_name
+    """
+
+    report_rows = connection.execute(
+        query,
+        parameters,
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "reports.html",
+        classes=class_list,
+        report_rows=report_rows,
+        selected_class_id=selected_class_id,
     )
 
 
