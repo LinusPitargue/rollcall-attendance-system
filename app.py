@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 
 from flask import Flask, redirect, render_template, request
 
@@ -6,6 +7,14 @@ from database import get_connection, initialize_database
 
 
 app = Flask(__name__)
+
+
+VALID_ATTENDANCE_STATUSES = {
+    "Present",
+    "Absent",
+    "Late",
+    "Excused",
+}
 
 
 @app.route("/")
@@ -453,6 +462,109 @@ def remove_enrollment(class_id, student_id):
     connection.close()
 
     return redirect(f"/classes/{class_id}/students")
+
+
+@app.route(
+    "/classes/<int:class_id>/attendance",
+    methods=["GET", "POST"],
+)
+def record_attendance(class_id):
+    connection = get_connection()
+
+    class_item = connection.execute(
+        """
+        SELECT id, subject_code, subject_name, section
+        FROM classes
+        WHERE id = ?
+        """,
+        (class_id,),
+    ).fetchone()
+
+    if class_item is None:
+        connection.close()
+        return "Class schedule not found", 404
+
+    attendance_date = request.values.get(
+        "attendance_date",
+        date.today().isoformat(),
+    )
+
+    if request.method == "POST":
+        student_ids = request.form.getlist("student_id", type=int)
+        statuses = request.form.getlist("status")
+
+        if len(student_ids) != len(statuses):
+            connection.close()
+            return "Attendance form data is invalid", 400
+
+        for student_id, status in zip(student_ids, statuses):
+            if status not in VALID_ATTENDANCE_STATUSES:
+                connection.close()
+                return "Invalid attendance status", 400
+
+            connection.execute(
+                """
+                INSERT INTO attendance
+                (
+                    class_id,
+                    student_id,
+                    attendance_date,
+                    status
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(
+                    class_id,
+                    student_id,
+                    attendance_date
+                )
+                DO UPDATE SET status = excluded.status
+                """,
+                (
+                    class_id,
+                    student_id,
+                    attendance_date,
+                    status,
+                ),
+            )
+
+        connection.commit()
+
+    enrolled_students = connection.execute(
+        """
+        SELECT students.id, students.student_number, students.full_name
+        FROM students
+        INNER JOIN enrollments
+            ON students.id = enrollments.student_id
+        WHERE enrollments.class_id = ?
+        ORDER BY students.full_name
+        """,
+        (class_id,),
+    ).fetchall()
+
+    existing_records = connection.execute(
+        """
+        SELECT student_id, status
+        FROM attendance
+        WHERE class_id = ?
+        AND attendance_date = ?
+        """,
+        (class_id, attendance_date),
+    ).fetchall()
+
+    existing_statuses = {
+        record["student_id"]: record["status"]
+        for record in existing_records
+    }
+
+    connection.close()
+
+    return render_template(
+        "attendance.html",
+        class_item=class_item,
+        enrolled_students=enrolled_students,
+        attendance_date=attendance_date,
+        existing_statuses=existing_statuses,
+    )
 
 
 if __name__ == "__main__":

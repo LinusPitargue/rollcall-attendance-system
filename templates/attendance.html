@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Attendance | RollCall</title>
+</head>
+<body>
+    <h1>Record Attendance</h1>
+
+    <p>
+        <strong>{{ class_item["subject_code"] }}</strong>
+        -
+        {{ class_item["subject_name"] }}
+        -
+        {{ class_item["section"] }}
+    </p>
+
+    <p>
+        <a href="/classes">Back to Class Schedules</a>
+    </p>
+
+    <form method="get">
+        <label for="attendance_date">Attendance Date:</label>
+
+        <input
+            type="date"
+            id="attendance_date"
+            name="attendance_date"
+            value="{{ attendance_date }}"
+            required
+        >
+
+        <button type="submit">
+            Load Date
+        </button>
+    </form>
+
+    <br>
+
+    <form method="post">
+        <input
+            type="hidden"
+            name="attendance_date"
+            value="{{ attendance_date }}"
+        >
+
+        {% if enrolled_students %}
+            <table border="1" cellpadding="8">
+                <thead>
+                    <tr>
+                        <th>Student Number</th>
+                        <th>Full Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for student in enrolled_students %}
+                    <tr>
+                        <td>
+                            {{ student["student_number"] }}
+
+                            <input
+                                type="hidden"
+                                name="student_id"
+                                value="{{ student['id'] }}"
+                            >
+                        </td>
+
+                        <td>
+                            {{ student["full_name"] }}
+                        </td>
+
+                        <td>
+                            <select name="status" required>
+                                <option
+                                    value="Present"
+                                    {% if existing_statuses.get(
+                                        student["id"],
+                                        "Present"
+                                    ) == "Present" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Present
+                                </option>
+
+                                <option
+                                    value="Absent"
+                                    {% if existing_statuses.get(
+                                        student["id"],
+                                        "Present"
+                                    ) == "Absent" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Absent
+                                </option>
+
+                                <option
+                                    value="Late"
+                                    {% if existing_statuses.get(
+                                        student["id"],
+                                        "Present"
+                                    ) == "Late" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Late
+                                </option>
+
+                                <option
+                                    value="Excused"
+                                    {% if existing_statuses.get(
+                                        student["id"],
+                                        "Present"
+                                    ) == "Excused" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Excused
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <br>
+
+            <button type="submit">
+                Save Attendance
+            </button>
+        {% else %}
+            <p>
+                No students are enrolled in this class yet.
+            </p>
+        {% endif %}
+    </form>
+</body>
+</html>
