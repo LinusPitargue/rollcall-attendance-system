@@ -9,7 +9,9 @@ if str(PROJECT_FOLDER) not in sys.path:
 
 
 import database
+import holiday_service
 import pytest
+import requests
 
 from app import app
 from database import initialize_database
@@ -186,3 +188,51 @@ def test_class_rejects_invalid_time(client):
 
     assert response.status_code == 200
     assert b"End time must be later than start time." in response.data
+
+
+def test_holiday_api_finds_holiday(monkeypatch):
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return [
+                {
+                    "date": "2026-12-25",
+                    "name": "Christmas Day",
+                }
+            ]
+
+    def fake_get(url, timeout):
+        return FakeResponse()
+
+    monkeypatch.setattr(
+        holiday_service.requests,
+        "get",
+        fake_get,
+    )
+
+    holiday, error = holiday_service.check_public_holiday(
+        "2026-12-25"
+    )
+
+    assert error is None
+    assert holiday["name"] == "Christmas Day"
+
+
+def test_holiday_api_handles_network_error(monkeypatch):
+    def fake_get(url, timeout):
+        raise requests.RequestException("API unavailable")
+
+    monkeypatch.setattr(
+        holiday_service.requests,
+        "get",
+        fake_get,
+    )
+
+    holiday, error = holiday_service.check_public_holiday(
+        "2026-12-25"
+    )
+
+    assert holiday is None
+    assert error is not None
