@@ -259,6 +259,98 @@ def new_class():
     )
 
 
+@app.route("/classes/<int:class_id>/edit", methods=["GET", "POST"])
+def edit_class(class_id):
+    connection = get_connection()
+
+    class_item = connection.execute(
+        """
+        SELECT
+            id,
+            subject_code,
+            subject_name,
+            section,
+            room,
+            meeting_day,
+            start_time,
+            end_time
+        FROM classes
+        WHERE id = ?
+        """,
+        (class_id,),
+    ).fetchone()
+
+    if class_item is None:
+        connection.close()
+        return "Class schedule not found", 404
+
+    error = None
+    form_data = {}
+
+    if request.method == "POST":
+        form_data = request.form
+
+        subject_code = request.form["subject_code"].strip()
+        subject_name = request.form["subject_name"].strip()
+        section = request.form["section"].strip()
+        room = request.form["room"].strip()
+        meeting_day = request.form["meeting_day"].strip()
+        start_time = request.form["start_time"].strip()
+        end_time = request.form["end_time"].strip()
+
+        required_values = [
+            subject_code,
+            subject_name,
+            section,
+            meeting_day,
+            start_time,
+            end_time,
+        ]
+
+        if not all(required_values):
+            error = "Please complete all required fields."
+        elif start_time >= end_time:
+            error = "End time must be later than start time."
+        else:
+            connection.execute(
+                """
+                UPDATE classes
+                SET subject_code = ?,
+                    subject_name = ?,
+                    section = ?,
+                    room = ?,
+                    meeting_day = ?,
+                    start_time = ?,
+                    end_time = ?
+                WHERE id = ?
+                """,
+                (
+                    subject_code,
+                    subject_name,
+                    section,
+                    room,
+                    meeting_day,
+                    start_time,
+                    end_time,
+                    class_id,
+                ),
+            )
+
+            connection.commit()
+            connection.close()
+
+            return redirect("/classes")
+
+    connection.close()
+
+    return render_template(
+        "class_edit_form.html",
+        error=error,
+        form_data=form_data,
+        class_item=class_item,
+    )
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Class Schedule | RollCall</title>
+</head>
+<body>
+    <h1>Edit Class Schedule</h1>
+
+    <p>
+        <a href="/classes">Back to Class Schedules</a>
+    </p>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        <p>
+            <label for="subject_code">Subject Code:</label><br>
+            <input
+                type="text"
+                id="subject_code"
+                name="subject_code"
+                value="{{ form_data.get('subject_code', class_item['subject_code']) }}"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="subject_name">Subject Name:</label><br>
+            <input
+                type="text"
+                id="subject_name"
+                name="subject_name"
+                value="{{ form_data.get('subject_name', class_item['subject_name']) }}"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="section">Section:</label><br>
+            <input
+                type="text"
+                id="section"
+                name="section"
+                value="{{ form_data.get('section', class_item['section']) }}"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="room">Room:</label><br>
+            <input
+                type="text"
+                id="room"
+                name="room"
+                value="{{ form_data.get('room', class_item['room'] or '') }}"
+            >
+        </p>
+
+        <p>
+            <label for="meeting_day">Meeting Day:</label><br>
+            <select id="meeting_day" name="meeting_day" required>
+                <option value="">Select a day</option>
+
+                {% for day in [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday"
+                ] %}
+                    <option
+                        value="{{ day }}"
+                        {% if form_data.get(
+                            'meeting_day',
+                            class_item['meeting_day']
+                        ) == day %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ day }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label for="start_time">Start Time:</label><br>
+            <input
+                type="time"
+                id="start_time"
+                name="start_time"
+                value="{{ form_data.get('start_time', class_item['start_time']) }}"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="end_time">End Time:</label><br>
+            <input
+                type="time"
+                id="end_time"
+                name="end_time"
+                value="{{ form_data.get('end_time', class_item['end_time']) }}"
+                required
+            >
+        </p>
+
+        <button type="submit">Update Class Schedule</button>
+    </form>
+</body>
+</html>
