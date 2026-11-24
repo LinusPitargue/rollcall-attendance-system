@@ -41,6 +41,12 @@
           <td>{{ class_item["start_time"] }} - {{ class_item["end_time"] }}</td>
           <td>{{ class_item["student_count"] }}</td>
           <td>
+            <a href="/classes/{{ class_item['id'] }}/students">
+              Manage Students
+            </a>
+
+            <br />
+
             <a href="/classes/{{ class_item['id'] }}/edit"> Edit </a>
 
             <form

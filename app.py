@@ -366,6 +366,95 @@ def delete_class(class_id):
     return redirect("/classes")
 
 
+@app.route("/classes/<int:class_id>/students", methods=["GET", "POST"])
+def manage_enrollment(class_id):
+    connection = get_connection()
+
+    class_item = connection.execute(
+        """
+        SELECT id, subject_code, subject_name, section
+        FROM classes
+        WHERE id = ?
+        """,
+        (class_id,),
+    ).fetchone()
+
+    if class_item is None:
+        connection.close()
+        return "Class schedule not found", 404
+
+    if request.method == "POST":
+        student_id = request.form.get("student_id", type=int)
+
+        if student_id is not None:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO enrollments
+                (class_id, student_id)
+                VALUES (?, ?)
+                """,
+                (class_id, student_id),
+            )
+            connection.commit()
+
+    enrolled_students = connection.execute(
+        """
+        SELECT students.id, students.student_number, students.full_name
+        FROM students
+        INNER JOIN enrollments
+            ON students.id = enrollments.student_id
+        WHERE enrollments.class_id = ?
+        ORDER BY students.full_name
+        """,
+        (class_id,),
+    ).fetchall()
+
+    available_students = connection.execute(
+        """
+        SELECT id, student_number, full_name
+        FROM students
+        WHERE id NOT IN (
+            SELECT student_id
+            FROM enrollments
+            WHERE class_id = ?
+        )
+        ORDER BY full_name
+        """,
+        (class_id,),
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "enrollment.html",
+        class_item=class_item,
+        enrolled_students=enrolled_students,
+        available_students=available_students,
+    )
+
+
+@app.route(
+    "/classes/<int:class_id>/students/<int:student_id>/remove",
+    methods=["POST"],
+)
+def remove_enrollment(class_id, student_id):
+    connection = get_connection()
+
+    connection.execute(
+        """
+        DELETE FROM enrollments
+        WHERE class_id = ?
+        AND student_id = ?
+        """,
+        (class_id, student_id),
+    )
+
+    connection.commit()
+    connection.close()
+
+    return redirect(f"/classes/{class_id}/students")
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)

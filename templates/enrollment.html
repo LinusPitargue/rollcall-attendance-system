@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Students | RollCall</title>
+  </head>
+  <body>
+    <h1>Manage Students in Class</h1>
+
+    <p>
+      <strong>{{ class_item["subject_code"] }}</strong>
+      - {{ class_item["subject_name"] }} - {{ class_item["section"] }}
+    </p>
+
+    <p>
+      <a href="/classes">Back to Class Schedules</a>
+    </p>
+
+    <h2>Enroll a Student</h2>
+
+    {% if available_students %}
+    <form method="post">
+      <label for="student_id">Select Student:</label>
+
+      <select id="student_id" name="student_id" required>
+        <option value="">Choose a student</option>
+
+        {% for student in available_students %}
+        <option value="{{ student['id'] }}">
+          {{ student["student_number"] }} - {{ student["full_name"] }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Enroll Student</button>
+    </form>
+    {% else %}
+    <p>All students are already enrolled in this class.</p>
+    {% endif %}
+
+    <h2>Enrolled Students</h2>
+
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Student Number</th>
+          <th>Full Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for student in enrolled_students %}
+        <tr>
+          <td>{{ student["student_number"] }}</td>
+          <td>{{ student["full_name"] }}</td>
+          <td>
+            <form
+              method="post"
+              action="/classes/{{ class_item['id'] }}/students/{{ student['id'] }}/remove"
+              onsubmit="return confirm('Remove this student from the class?');"
+            >
+              <button type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3">No students are enrolled in this class yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
