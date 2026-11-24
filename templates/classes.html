@@ -1,80 +1,78 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Class Schedules | RollCall</title>
-  </head>
-  <body>
+{% extends "base.html" %} {% block title %} Classes | RollCall {% endblock %} {%
+block content %}
+<div class="page-header">
+  <div>
+    <p class="eyebrow">Schedule management</p>
     <h1>Class Schedules</h1>
+  </div>
 
-    <p>
-      <a href="/">Back to Dashboard</a>
-    </p>
+  <a class="button" href="/classes/new"> Add Class Schedule </a>
+</div>
 
-    <p>
-      <a href="/classes/new">Add New Class Schedule</a>
-    </p>
+<div class="table-card">
+  {% if classes %}
+  <table>
+    <thead>
+      <tr>
+        <th>Subject Code</th>
+        <th>Subject Name</th>
+        <th>Section</th>
+        <th>Room</th>
+        <th>Day</th>
+        <th>Time</th>
+        <th>Students</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-    <p>
-      <a href="/reports">View Attendance Reports</a>
-    </p>
-
-    <table border="1" cellpadding="8">
-      <thead>
-        <tr>
-          <th>Subject Code</th>
-          <th>Subject Name</th>
-          <th>Section</th>
-          <th>Room</th>
-          <th>Meeting Day</th>
-          <th>Time</th>
-          <th>Students</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for class_item in classes %}
-        <tr>
-          <td>{{ class_item["subject_code"] }}</td>
-          <td>{{ class_item["subject_name"] }}</td>
-          <td>{{ class_item["section"] }}</td>
-          <td>{{ class_item["room"] or "Not assigned" }}</td>
-          <td>{{ class_item["meeting_day"] }}</td>
-          <td>{{ class_item["start_time"] }} - {{ class_item["end_time"] }}</td>
-          <td>{{ class_item["student_count"] }}</td>
-          <td>
-            <a href="/classes/{{ class_item['id'] }}/students">
-              Manage Students
+    <tbody>
+      {% for class_item in classes %}
+      <tr>
+        <td>{{ class_item["subject_code"] }}</td>
+        <td>{{ class_item["subject_name"] }}</td>
+        <td>{{ class_item["section"] }}</td>
+        <td>{{ class_item["room"] or "Not assigned" }}</td>
+        <td>{{ class_item["meeting_day"] }}</td>
+        <td>{{ class_item["start_time"] }} - {{ class_item["end_time"] }}</td>
+        <td>{{ class_item["student_count"] }}</td>
+        <td>
+          <div class="action-links">
+            <a
+              class="button small"
+              href="/classes/{{ class_item['id'] }}/students"
+            >
+              Students
             </a>
 
-            <br />
-
-            <a href="/classes/{{ class_item['id'] }}/attendance">
-              Record Attendance
+            <a
+              class="button small secondary"
+              href="/classes/{{ class_item['id'] }}/attendance"
+            >
+              Attendance
             </a>
 
-            <br />
-
-            <a href="/classes/{{ class_item['id'] }}/edit"> Edit </a>
+            <a
+              class="button small secondary"
+              href="/classes/{{ class_item['id'] }}/edit"
+            >
+              Edit
+            </a>
 
             <form
               method="post"
               action="/classes/{{ class_item['id'] }}/delete"
-              style="display: inline"
               onsubmit="return confirm('Delete this class schedule?');"
             >
-              <button type="submit">Delete</button>
+              <button class="button small danger" type="submit">Delete</button>
             </form>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="8">No class schedules have been added yet.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </body>
-</html>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-message">No class schedules have been added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

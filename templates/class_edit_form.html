@@ -1,70 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Class Schedule | RollCall</title>
-</head>
-<body>
-    <h1>Edit Class Schedule</h1>
+{% extends "base.html" %}
 
-    <p>
-        <a href="/classes">Back to Class Schedules</a>
-    </p>
+{% block title %}
+Edit Class Schedule | RollCall
+{% endblock %}
 
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Schedule management</p>
+        <h1>Edit Class Schedule</h1>
+    </div>
+
+    <a class="button secondary" href="/classes">
+        Back to Classes
+    </a>
+</div>
+
+<div class="form-card">
     {% if error %}
-        <p style="color: red;">{{ error }}</p>
+        <div class="error-message">
+            {{ error }}
+        </div>
     {% endif %}
 
     <form method="post">
-        <p>
-            <label for="subject_code">Subject Code:</label><br>
+        <div class="form-group">
+            <label for="subject_code">
+                Subject Code
+            </label>
+
             <input
                 type="text"
                 id="subject_code"
                 name="subject_code"
-                value="{{ form_data.get('subject_code', class_item['subject_code']) }}"
+                value="{{ form_data.get(
+                    'subject_code',
+                    class_item['subject_code']
+                ) }}"
                 required
             >
-        </p>
+        </div>
 
-        <p>
-            <label for="subject_name">Subject Name:</label><br>
+        <div class="form-group">
+            <label for="subject_name">
+                Subject Name
+            </label>
+
             <input
                 type="text"
                 id="subject_name"
                 name="subject_name"
-                value="{{ form_data.get('subject_name', class_item['subject_name']) }}"
+                value="{{ form_data.get(
+                    'subject_name',
+                    class_item['subject_name']
+                ) }}"
                 required
             >
-        </p>
+        </div>
 
-        <p>
-            <label for="section">Section:</label><br>
+        <div class="form-group">
+            <label for="section">
+                Section
+            </label>
+
             <input
                 type="text"
                 id="section"
                 name="section"
-                value="{{ form_data.get('section', class_item['section']) }}"
+                value="{{ form_data.get(
+                    'section',
+                    class_item['section']
+                ) }}"
                 required
             >
-        </p>
+        </div>
 
-        <p>
-            <label for="room">Room:</label><br>
+        <div class="form-group">
+            <label for="room">
+                Room
+            </label>
+
             <input
                 type="text"
                 id="room"
                 name="room"
-                value="{{ form_data.get('room', class_item['room'] or '') }}"
+                value="{{ form_data.get(
+                    'room',
+                    class_item['room'] or ''
+                ) }}"
             >
-        </p>
+        </div>
 
-        <p>
-            <label for="meeting_day">Meeting Day:</label><br>
+        <div class="form-group">
+            <label for="meeting_day">
+                Meeting Day
+            </label>
+
             <select id="meeting_day" name="meeting_day" required>
-                <option value="">Select a day</option>
-
                 {% for day in [
                     "Monday",
                     "Tuesday",
@@ -86,31 +118,45 @@
                     </option>
                 {% endfor %}
             </select>
-        </p>
+        </div>
 
-        <p>
-            <label for="start_time">Start Time:</label><br>
+        <div class="form-group">
+            <label for="start_time">
+                Start Time
+            </label>
+
             <input
                 type="time"
                 id="start_time"
                 name="start_time"
-                value="{{ form_data.get('start_time', class_item['start_time']) }}"
+                value="{{ form_data.get(
+                    'start_time',
+                    class_item['start_time']
+                ) }}"
                 required
             >
-        </p>
+        </div>
 
-        <p>
-            <label for="end_time">End Time:</label><br>
+        <div class="form-group">
+            <label for="end_time">
+                End Time
+            </label>
+
             <input
                 type="time"
                 id="end_time"
                 name="end_time"
-                value="{{ form_data.get('end_time', class_item['end_time']) }}"
+                value="{{ form_data.get(
+                    'end_time',
+                    class_item['end_time']
+                ) }}"
                 required
             >
-        </p>
+        </div>
 
-        <button type="submit">Update Class Schedule</button>
+        <button class="button" type="submit">
+            Update Class Schedule
+        </button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}
