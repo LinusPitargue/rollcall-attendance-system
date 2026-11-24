@@ -4,6 +4,7 @@ from datetime import date
 from flask import Flask, redirect, render_template, request
 
 from database import get_connection, initialize_database
+from holiday_service import check_public_holiday
 
 
 app = Flask(__name__)
@@ -489,45 +490,55 @@ def record_attendance(class_id):
         date.today().isoformat(),
     )
 
+    holiday, api_error = check_public_holiday(attendance_date)
+    message = None
+
     if request.method == "POST":
-        student_ids = request.form.getlist("student_id", type=int)
-        statuses = request.form.getlist("status")
-
-        if len(student_ids) != len(statuses):
-            connection.close()
-            return "Attendance form data is invalid", 400
-
-        for student_id, status in zip(student_ids, statuses):
-            if status not in VALID_ATTENDANCE_STATUSES:
-                connection.close()
-                return "Invalid attendance status", 400
-
-            connection.execute(
-                """
-                INSERT INTO attendance
-                (
-                    class_id,
-                    student_id,
-                    attendance_date,
-                    status
-                )
-                VALUES (?, ?, ?, ?)
-                ON CONFLICT(
-                    class_id,
-                    student_id,
-                    attendance_date
-                )
-                DO UPDATE SET status = excluded.status
-                """,
-                (
-                    class_id,
-                    student_id,
-                    attendance_date,
-                    status,
-                ),
+        if holiday is not None:
+            message = (
+                f"Attendance was not saved because "
+                f"{holiday.get('name', 'this date')} is a public holiday."
             )
+        else:
+            student_ids = request.form.getlist("student_id", type=int)
+            statuses = request.form.getlist("status")
 
-        connection.commit()
+            if len(student_ids) != len(statuses):
+                connection.close()
+                return "Attendance form data is invalid", 400
+
+            for student_id, status in zip(student_ids, statuses):
+                if status not in VALID_ATTENDANCE_STATUSES:
+                    connection.close()
+                    return "Invalid attendance status", 400
+
+                connection.execute(
+                    """
+                    INSERT INTO attendance
+                    (
+                        class_id,
+                        student_id,
+                        attendance_date,
+                        status
+                    )
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(
+                        class_id,
+                        student_id,
+                        attendance_date
+                    )
+                    DO UPDATE SET status = excluded.status
+                    """,
+                    (
+                        class_id,
+                        student_id,
+                        attendance_date,
+                        status,
+                    ),
+                )
+
+            connection.commit()
+            message = "Attendance saved successfully."
 
     enrolled_students = connection.execute(
         """
@@ -564,6 +575,9 @@ def record_attendance(class_id):
         enrolled_students=enrolled_students,
         attendance_date=attendance_date,
         existing_statuses=existing_statuses,
+        holiday=holiday,
+        api_error=api_error,
+        message=message,
     )
 
 

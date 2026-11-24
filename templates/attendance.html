@@ -20,6 +20,26 @@
         <a href="/classes">Back to Class Schedules</a>
     </p>
 
+    {% if message %}
+        <p style="color: green;">
+            {{ message }}
+        </p>
+    {% endif %}
+
+    {% if holiday %}
+        <p style="color: red;">
+            Public holiday detected:
+            <strong>{{ holiday["name"] }}</strong>
+        </p>
+    {% endif %}
+
+    {% if api_error %}
+        <p style="color: orange;">
+            The public holiday API could not be reached.
+            Please verify the date manually.
+        </p>
+    {% endif %}
+
     <form method="get">
         <label for="attendance_date">Attendance Date:</label>
 
@@ -32,7 +52,7 @@
         >
 
         <button type="submit">
-            Load Date
+            Check Date
         </button>
     </form>
 
@@ -130,9 +150,15 @@
 
             <br>
 
-            <button type="submit">
-                Save Attendance
-            </button>
+            {% if holiday %}
+                <button type="submit" disabled>
+                    Attendance Disabled on Holiday
+                </button>
+            {% else %}
+                <button type="submit">
+                    Save Attendance
+                </button>
+            {% endif %}
         {% else %}
             <p>
                 No students are enrolled in this class yet.
