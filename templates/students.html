@@ -1,58 +1,56 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Students | RollCall</title>
-  </head>
-  <body>
-    <h1>Student Database</h1>
+{% extends "base.html" %} {% block title %} Students | RollCall {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <p class="eyebrow">Student database</p>
+    <h1>Students</h1>
+  </div>
 
-    <p>
-      <a href="/">Back to Dashboard</a>
-    </p>
+  <a class="button" href="/students/new"> Add New Student </a>
+</div>
 
-    <p>
-      <a href="/students/new">Add New Student</a>
-    </p>
+<div class="table-card">
+  {% if students %}
+  <table>
+    <thead>
+      <tr>
+        <th>Student Number</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-    <table border="1" cellpadding="8">
-      <thead>
-        <tr>
-          <th>Student Number</th>
-          <th>Full Name</th>
-          <th>Email</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for student in students %}
-        <tr>
-          <td>{{ student["student_number"] }}</td>
-          <td>{{ student["full_name"] }}</td>
-          <td>{{ student["email"] or "No email" }}</td>
-          <td>
-            <a href="/students/{{ student['id'] }}/edit"> Edit </a>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student["student_number"] }}</td>
+        <td>{{ student["full_name"] }}</td>
+        <td>{{ student["email"] or "No email" }}</td>
+        <td>
+          <div class="action-links">
+            <a
+              class="button small secondary"
+              href="/students/{{ student['id'] }}/edit"
+            >
+              Edit
+            </a>
 
             <form
               method="post"
               action="/students/{{ student['id'] }}/delete"
-              style="display: inline"
-              onsubmit="
-                return confirm('Are you sure you want to delete this student?');
-              "
+              onsubmit="return confirm('Delete this student?');"
             >
-              <button type="submit">Delete</button>
+              <button class="button small danger" type="submit">Delete</button>
             </form>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="4">No students have been added yet.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </body>
-</html>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-message">No students have been added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

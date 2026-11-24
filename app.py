@@ -20,31 +20,7 @@ VALID_ATTENDANCE_STATUSES = {
 
 @app.route("/")
 def home():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>RollCall</title>
-    </head>
-    <body>
-        <h1>RollCall</h1>
-        <p>Class scheduling and student attendance reporting system.</p>
-        <p>Database connection is ready.</p>
-
-        <p>
-            <a href="/students">View Students</a>
-        </p>
-
-        <p>
-            <a href="/classes">View Class Schedules</a>
-        </p>
-
-        <p>
-            <a href="/reports">View Attendance Reports</a>
-        </p>
-    </body>
-    </html>
-    """
+    return render_template("home.html")
 
 
 @app.route("/students")

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RollCall Dashboard</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="/">RollCall</a>
+    </nav>
+
+    <main class="container">
+      <section class="hero">
+        <div>
+          <h1>RollCall</h1>
+          <p>A class scheduling and student attendance reporting system.</p>
+        </div>
+
+        <a class="button" href="/students"> Manage Students </a>
+      </section>
+
+      <section class="card-grid">
+        <div class="card">
+          <h2>Students</h2>
+          <p>Add, edit, delete, and manage student records.</p>
+          <a class="button" href="/students"> Open Students </a>
+        </div>
+
+        <div class="card">
+          <h2>Class Schedules</h2>
+          <p>Create and manage class schedules and enrollments.</p>
+          <a class="button" href="/classes"> Open Classes </a>
+        </div>
+
+        <div class="card">
+          <h2>Attendance Reports</h2>
+          <p>Record attendance and view attendance percentages.</p>
+          <a class="button" href="/reports"> Open Reports </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,104 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Reports | RollCall</title>
-</head>
-<body>
-    <h1>Attendance Reports</h1>
+{% extends "base.html" %}
 
-    <p>
-        <a href="/">Back to Dashboard</a>
-    </p>
+{% block title %}
+Attendance Reports | RollCall
+{% endblock %}
 
-    <p>
-        <a href="/classes">Back to Class Schedules</a>
-    </p>
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Attendance analysis</p>
+        <h1>Attendance Reports</h1>
+    </div>
 
+    <a class="button secondary" href="/classes">
+        Back to Classes
+    </a>
+</div>
+
+<div class="form-card">
     <form method="get">
-        <label for="class_id">Filter by Class:</label>
+        <div class="form-group">
+            <label for="class_id">
+                Filter by Class
+            </label>
 
-        <select id="class_id" name="class_id">
-            <option value="">All Classes</option>
-
-            {% for class_item in classes %}
-                <option
-                    value="{{ class_item['id'] }}"
-                    {% if selected_class_id == class_item['id'] %}
-                        selected
-                    {% endif %}
-                >
-                    {{ class_item["subject_code"] }}
-                    -
-                    {{ class_item["section"] }}
+            <select id="class_id" name="class_id">
+                <option value="">
+                    All Classes
                 </option>
-            {% endfor %}
-        </select>
 
-        <button type="submit">
+                {% for class_item in classes %}
+                    <option
+                        value="{{ class_item['id'] }}"
+                        {% if selected_class_id == class_item['id'] %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ class_item["subject_code"] }}
+                        -
+                        {{ class_item["section"] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="button" type="submit">
             Filter Report
         </button>
     </form>
+</div>
 
-    <br>
+<br>
 
-    <table border="1" cellpadding="8">
-        <thead>
-            <tr>
-                <th>Class</th>
-                <th>Student Number</th>
-                <th>Student Name</th>
-                <th>Total Records</th>
-                <th>Present</th>
-                <th>Absent</th>
-                <th>Late</th>
-                <th>Excused</th>
-                <th>Attendance Percentage</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for row in report_rows %}
-                {% set percentage =
-                    (row["present_count"] / row["total_records"] * 100)
-                    if row["total_records"] > 0
-                    else 0
-                %}
-
+<div class="table-card">
+    {% if report_rows %}
+        <table>
+            <thead>
                 <tr>
-                    <td>
-                        {{ row["subject_code"] }}
-                        -
-                        {{ row["section"] }}
-                    </td>
-
-                    <td>{{ row["student_number"] }}</td>
-
-                    <td>{{ row["full_name"] }}</td>
-
-                    <td>{{ row["total_records"] }}</td>
-
-                    <td>{{ row["present_count"] }}</td>
-
-                    <td>{{ row["absent_count"] }}</td>
-
-                    <td>{{ row["late_count"] }}</td>
-
-                    <td>{{ row["excused_count"] }}</td>
-
-                    <td>
-                        {{ "%.2f"|format(percentage) }}%
-                    </td>
+                    <th>Class</th>
+                    <th>Student Number</th>
+                    <th>Student Name</th>
+                    <th>Total</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late</th>
+                    <th>Excused</th>
+                    <th>Attendance</th>
                 </tr>
-            {% else %}
-                <tr>
-                    <td colspan="9">
-                        No attendance records are available yet.
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+            </thead>
+
+            <tbody>
+                {% for row in report_rows %}
+                    {% set percentage =
+                        (row["present_count"] / row["total_records"] * 100)
+                        if row["total_records"] > 0
+                        else 0
+                    %}
+
+                    <tr>
+                        <td>
+                            {{ row["subject_code"] }}
+                            -
+                            {{ row["section"] }}
+                        </td>
+
+                        <td>
+                            {{ row["student_number"] }}
+                        </td>
+
+                        <td>
+                            {{ row["full_name"] }}
+                        </td>
+
+                        <td>
+                            {{ row["total_records"] }}
+                        </td>
+
+                        <td>
+                            {{ row["present_count"] }}
+                        </td>
+
+                        <td>
+                            {{ row["absent_count"] }}
+                        </td>
+
+                        <td>
+                            {{ row["late_count"] }}
+                        </td>
+
+                        <td>
+                            {{ row["excused_count"] }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ "%.2f"|format(percentage) }}%
+                            </strong>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-message">
+            No attendance records are available yet.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
