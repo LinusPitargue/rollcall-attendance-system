@@ -8,6 +8,7 @@ if str(PROJECT_FOLDER) not in sys.path:
     sys.path.insert(0, str(PROJECT_FOLDER))
 
 
+import app as app_module
 import database
 import holiday_service
 import pytest
@@ -63,6 +64,38 @@ def get_student_id():
     connection.close()
 
     return student["id"]
+
+
+def add_test_class(client):
+    client.post(
+        "/classes/new",
+        data={
+            "subject_code": "CS101",
+            "subject_name": "Programming 1",
+            "section": "BSCS 2A",
+            "room": "Laboratory 2",
+            "meeting_day": "Monday",
+            "start_time": "08:00",
+            "end_time": "10:00",
+        },
+    )
+
+
+def get_class_id():
+    connection = database.get_connection()
+
+    class_item = connection.execute(
+        """
+        SELECT id
+        FROM classes
+        WHERE subject_code = ?
+        """,
+        ("CS101",),
+    ).fetchone()
+
+    connection.close()
+
+    return class_item["id"]
 
 
 def test_home_page_loads(client):
@@ -236,3 +269,97 @@ def test_holiday_api_handles_network_error(monkeypatch):
 
     assert holiday is None
     assert error is not None
+
+
+def test_attendance_can_be_recorded_and_reported(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        app_module,
+        "check_public_holiday",
+        lambda attendance_date: (None, None),
+    )
+
+    add_test_student(client)
+    add_test_class(client)
+
+    student_id = get_student_id()
+    class_id = get_class_id()
+
+    client.post(
+        f"/classes/{class_id}/students",
+        data={
+            "student_id": student_id,
+        },
+    )
+
+    attendance_response = client.post(
+        f"/classes/{class_id}/attendance",
+        data={
+            "attendance_date": "2026-11-24",
+            "student_id": str(student_id),
+            "status": "Present",
+        },
+        follow_redirects=True,
+    )
+
+    assert attendance_response.status_code == 200
+    assert b"Attendance saved successfully." in attendance_response.data
+
+    report_response = client.get("/reports")
+
+    assert report_response.status_code == 200
+    assert b"Juan Dela Cruz" in report_response.data
+    assert b"100.00%" in report_response.data
+
+
+def test_attendance_is_blocked_on_holiday(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        app_module,
+        "check_public_holiday",
+        lambda attendance_date: (
+            {
+                "name": "Christmas Day",
+            },
+            None,
+        ),
+    )
+
+    add_test_student(client)
+    add_test_class(client)
+
+    student_id = get_student_id()
+    class_id = get_class_id()
+
+    client.post(
+        f"/classes/{class_id}/students",
+        data={
+            "student_id": student_id,
+        },
+    )
+
+    response = client.post(
+        f"/classes/{class_id}/attendance",
+        data={
+            "attendance_date": "2026-12-25",
+            "student_id": str(student_id),
+            "status": "Present",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Attendance was not saved" in response.data
+
+    connection = database.get_connection()
+
+    record_count = connection.execute(
+        "SELECT COUNT(*) AS count FROM attendance"
+    ).fetchone()["count"]
+
+    connection.close()
+
+    assert record_count == 0
