@@ -351,6 +351,21 @@ def edit_class(class_id):
     )
 
 
+@app.route("/classes/<int:class_id>/delete", methods=["POST"])
+def delete_class(class_id):
+    connection = get_connection()
+
+    connection.execute(
+        "DELETE FROM classes WHERE id = ?",
+        (class_id,),
+    )
+
+    connection.commit()
+    connection.close()
+
+    return redirect("/classes")
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)

@@ -26,7 +26,7 @@
           <th>Meeting Day</th>
           <th>Time</th>
           <th>Students</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
 
@@ -42,6 +42,15 @@
           <td>{{ class_item["student_count"] }}</td>
           <td>
             <a href="/classes/{{ class_item['id'] }}/edit"> Edit </a>
+
+            <form
+              method="post"
+              action="/classes/{{ class_item['id'] }}/delete"
+              style="display: inline"
+              onsubmit="return confirm('Delete this class schedule?');"
+            >
+              <button type="submit">Delete</button>
+            </form>
           </td>
         </tr>
         {% else %}
