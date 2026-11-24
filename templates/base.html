@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}RollCall{% endblock %}</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a class="brand" href="/">RollCall</a>
+
+      <div class="navigation-links">
+        <a href="/">Dashboard</a>
+        <a href="/students">Students</a>
+        <a href="/classes">Classes</a>
+        <a href="/reports">Reports</a>
+      </div>
+    </nav>
+
+    <main class="container">{% block content %} {% endblock %}</main>
+  </body>
+</html>
