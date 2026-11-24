@@ -20,8 +20,13 @@ def home():
         <h1>RollCall</h1>
         <p>Class scheduling and student attendance reporting system.</p>
         <p>Database connection is ready.</p>
+
         <p>
             <a href="/students">View Students</a>
+        </p>
+
+        <p>
+            <a href="/classes">View Class Schedules</a>
         </p>
     </body>
     </html>
@@ -154,6 +159,35 @@ def delete_student(student_id):
     connection.close()
 
     return redirect("/students")
+
+
+@app.route("/classes")
+def classes():
+    connection = get_connection()
+
+    class_list = connection.execute(
+        """
+        SELECT
+            classes.id,
+            classes.subject_code,
+            classes.subject_name,
+            classes.section,
+            classes.room,
+            classes.meeting_day,
+            classes.start_time,
+            classes.end_time,
+            COUNT(enrollments.student_id) AS student_count
+        FROM classes
+        LEFT JOIN enrollments
+            ON classes.id = enrollments.class_id
+        GROUP BY classes.id
+        ORDER BY classes.subject_code
+        """
+    ).fetchall()
+
+    connection.close()
+
+    return render_template("classes.html", classes=class_list)
 
 
 if __name__ == "__main__":

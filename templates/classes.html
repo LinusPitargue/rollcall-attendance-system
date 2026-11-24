@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Class Schedules | RollCall</title>
+  </head>
+  <body>
+    <h1>Class Schedules</h1>
+
+    <p>
+      <a href="/">Back to Dashboard</a>
+    </p>
+
+    <p>
+      <a href="/classes/new">Add New Class Schedule</a>
+    </p>
+
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Subject Code</th>
+          <th>Subject Name</th>
+          <th>Section</th>
+          <th>Room</th>
+          <th>Meeting Day</th>
+          <th>Time</th>
+          <th>Students</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for class_item in classes %}
+        <tr>
+          <td>{{ class_item["subject_code"] }}</td>
+          <td>{{ class_item["subject_name"] }}</td>
+          <td>{{ class_item["section"] }}</td>
+          <td>{{ class_item["room"] or "Not assigned" }}</td>
+          <td>{{ class_item["meeting_day"] }}</td>
+          <td>{{ class_item["start_time"] }} - {{ class_item["end_time"] }}</td>
+          <td>{{ class_item["student_count"] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7">No class schedules have been added yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
