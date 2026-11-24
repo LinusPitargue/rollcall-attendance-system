@@ -190,6 +190,75 @@ def classes():
     return render_template("classes.html", classes=class_list)
 
 
+@app.route("/classes/new", methods=["GET", "POST"])
+def new_class():
+    error = None
+    form_data = {}
+
+    if request.method == "POST":
+        form_data = request.form
+
+        subject_code = request.form["subject_code"].strip()
+        subject_name = request.form["subject_name"].strip()
+        section = request.form["section"].strip()
+        room = request.form["room"].strip()
+        meeting_day = request.form["meeting_day"].strip()
+        start_time = request.form["start_time"].strip()
+        end_time = request.form["end_time"].strip()
+
+        required_values = [
+            subject_code,
+            subject_name,
+            section,
+            meeting_day,
+            start_time,
+            end_time,
+        ]
+
+        if not all(required_values):
+            error = "Please complete all required fields."
+        elif start_time >= end_time:
+            error = "End time must be later than start time."
+        else:
+            connection = get_connection()
+
+            connection.execute(
+                """
+                INSERT INTO classes
+                (
+                    subject_code,
+                    subject_name,
+                    section,
+                    room,
+                    meeting_day,
+                    start_time,
+                    end_time
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    subject_code,
+                    subject_name,
+                    section,
+                    room,
+                    meeting_day,
+                    start_time,
+                    end_time,
+                ),
+            )
+
+            connection.commit()
+            connection.close()
+
+            return redirect("/classes")
+
+    return render_template(
+        "class_form.html",
+        error=error,
+        form_data=form_data,
+    )
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)

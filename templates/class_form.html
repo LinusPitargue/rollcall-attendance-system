@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Class Schedule | RollCall</title>
+  </head>
+  <body>
+    <h1>Add Class Schedule</h1>
+
+    <p>
+      <a href="/classes">Back to Class Schedules</a>
+    </p>
+
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+      <p>
+        <label for="subject_code">Subject Code:</label><br />
+        <input
+          type="text"
+          id="subject_code"
+          name="subject_code"
+          value="{{ form_data.get('subject_code', '') }}"
+          placeholder="Example: CS101"
+          required
+        />
+      </p>
+
+      <p>
+        <label for="subject_name">Subject Name:</label><br />
+        <input
+          type="text"
+          id="subject_name"
+          name="subject_name"
+          value="{{ form_data.get('subject_name', '') }}"
+          placeholder="Example: Programming 1"
+          required
+        />
+      </p>
+
+      <p>
+        <label for="section">Section:</label><br />
+        <input
+          type="text"
+          id="section"
+          name="section"
+          value="{{ form_data.get('section', '') }}"
+          placeholder="Example: BSCS 2A"
+          required
+        />
+      </p>
+
+      <p>
+        <label for="room">Room:</label><br />
+        <input
+          type="text"
+          id="room"
+          name="room"
+          value="{{ form_data.get('room', '') }}"
+          placeholder="Example: Laboratory 2"
+        />
+      </p>
+
+      <p>
+        <label for="meeting_day">Meeting Day:</label><br />
+        <select id="meeting_day" name="meeting_day" required>
+          <option value="">Select a day</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+      </p>
+
+      <p>
+        <label for="start_time">Start Time:</label><br />
+        <input
+          type="time"
+          id="start_time"
+          name="start_time"
+          value="{{ form_data.get('start_time', '') }}"
+          required
+        />
+      </p>
+
+      <p>
+        <label for="end_time">End Time:</label><br />
+        <input
+          type="time"
+          id="end_time"
+          name="end_time"
+          value="{{ form_data.get('end_time', '') }}"
+          required
+        />
+      </p>
+
+      <button type="submit">Save Class Schedule</button>
+    </form>
+  </body>
+</html>
